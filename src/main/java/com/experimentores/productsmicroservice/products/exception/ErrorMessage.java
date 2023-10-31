@@ -1,4 +1,4 @@
-package com.example.microserviceproducts.exception;
+package com.experimentores.productsmicroservice.products.exception;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;

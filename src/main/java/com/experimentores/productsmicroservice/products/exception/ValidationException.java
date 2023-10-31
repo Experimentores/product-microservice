@@ -1,4 +1,4 @@
-package com.example.microserviceproducts.exception;
+package com.experimentores.productsmicroservice.products.exception;
 
 public class ValidationException extends RuntimeException{
     public ValidationException() {
