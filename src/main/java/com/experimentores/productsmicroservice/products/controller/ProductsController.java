@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/tripstore/v1/products/")
+@RequestMapping("${tripstore.products-service.path}")
 public class ProductsController extends CrudController<Product, Long, ProductResource, CreateProductResource, UpdateProductResource> {
 
     private final IProductService productService;
@@ -39,9 +39,6 @@ public class ProductsController extends CrudController<Product, Long, ProductRes
     protected boolean isValidUpdateResource(UpdateProductResource updateProductResource) {
         return true;
     }
-
-
-
 
     @GetMapping(value = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ProductResource> getProductById(@PathVariable Long id) {
