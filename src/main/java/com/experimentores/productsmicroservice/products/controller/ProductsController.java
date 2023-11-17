@@ -3,6 +3,8 @@ package com.experimentores.productsmicroservice.products.controller;
 import com.crudjpa.controller.CrudController;
 import com.crudjpa.exception.ResourceNotFoundException;
 import com.experimentores.productsmicroservice.products.domain.model.Product;
+import com.experimentores.productsmicroservice.products.domain.model.ProductCategory;
+import com.experimentores.productsmicroservice.products.domain.services.IProductCategoryService;
 import com.experimentores.productsmicroservice.products.domain.services.IProductService;
 import com.experimentores.productsmicroservice.products.exception.InvalidCreateResourceException;
 import com.experimentores.productsmicroservice.products.exception.InvalidUpdateResourceException;
@@ -10,6 +12,7 @@ import com.experimentores.productsmicroservice.products.mapping.ProductMapper;
 import com.experimentores.productsmicroservice.products.resources.CreateProductResource;
 import com.experimentores.productsmicroservice.products.resources.ProductResource;
 import com.experimentores.productsmicroservice.products.resources.UpdateProductResource;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,10 +28,12 @@ import java.util.Optional;
 public class ProductsController extends CrudController<Product, Long, ProductResource, CreateProductResource, UpdateProductResource> {
 
     private final IProductService productService;
+    private final IProductCategoryService productCategoryService;
 
-    public ProductsController(IProductService productService, ProductMapper mapper) {
+    public ProductsController(IProductService productService, ProductMapper mapper, IProductCategoryService productCategoryService) {
         super(productService, mapper);
         this.productService = productService;
+        this.productCategoryService = productCategoryService;
     }
     @Override
     protected boolean isValidCreateResource(CreateProductResource createProductResource) {
@@ -80,16 +85,19 @@ public class ProductsController extends CrudController<Product, Long, ProductRes
     }
 
     @GetMapping(value = "search/")
-    public ResponseEntity<List<ProductResource>> searchProducts(@RequestParam(required = false) String category, @RequestParam(required = false) Double rating) {
+    public ResponseEntity<List<ProductResource>> searchProducts(@RequestParam(required = false) @Nullable Long categoryId, @RequestParam(required = false) Double rating) {
         HashSet<Product> products = new HashSet<>();
-        if(category != null)
-            products.addAll(productService.findProductsByCategory(category));
+
+        if(categoryId != null) {
+            Optional<ProductCategory> category = productCategoryService.getById(categoryId);
+            category.ifPresent(productCategory -> products.addAll(productService.findProductsByCategory(productCategory)));
+        }
 
         if(rating != null)
             products.addAll(productService.findProductsByRating(rating));
 
         List<ProductResource> filterProducts = products.stream()
-                .filter(product -> (category == null || product.getCategory().equals(category))
+                .filter(product -> (categoryId == null || product.getCategory().getId() == categoryId)
                         && (rating == null || product.getRating().equals(rating)))
                 .map(this::fromModelToResource)
                 .toList();

@@ -9,4 +9,7 @@ public class MappingConfiguration {
     public ProductMapper tripMapper() {
         return new ProductMapper();
     }
+
+    @Bean
+    public ProductCategoryMapper productCategoryMapper() { return new ProductCategoryMapper(); }
 }
